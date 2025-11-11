@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Collections;
 
 public class SlangDictionary implements Serializable {
     public static final long serialVersionUID = 1L;
@@ -30,37 +31,45 @@ public class SlangDictionary implements Serializable {
         this.searchHistory = new ArrayList<>();
     }
 
-    public void loadFromFile(String filePath) {
-        try {
-            List<String[]> allData = new ArrayList<>();
-            FileReader fileReader = new FileReader(filePath);
-            BufferedReader br = new BufferedReader(fileReader);
-
+    /**
+     * @param filePath
+     * @throws IOException
+     */
+    public void loadFromFile(String filePath) throws IOException {
+        try (FileReader fileReader = new FileReader(filePath);
+                BufferedReader br = new BufferedReader(fileReader)) {
             br.readLine();
 
-            for (String line; (line = br.readLine()) != null;) {
-                String[] parts = line.split("`");
-                if (parts.length < 2) {
-                    continue;
-                }
+            String line;
+            int lineNumber = 1;
 
-                String slang = parts[0];
-                List<String> definition = Arrays.asList(parts[1].trim().split("\\s*\\|\\s*"));
-
-                this.slangMap.put(slang, definition);
-                for (String def : definition) {
-                    String[] keywords = def.split("\\s+");
-
-                    for (String keyword : keywords) {
-                        String cleanKeyword = keyword.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-
-                        if (cleanKeyword.isEmpty()) {
-                            continue;
-                        }
-                        this.definitionMap.computeIfAbsent(cleanKeyword, k -> new HashSet<>()).add(slang);
+            while ((line = br.readLine()) != null) {
+                lineNumber++;
+                try {
+                    String[] parts = line.split("`");
+                    if (parts.length < 2) {
+                        continue;
                     }
+                    String slang = parts[0];
+                    List<String> definition = Arrays.asList(parts[1].trim().split("\\s*\\|\\s*"));
+
+                    this.slangMap.put(slang, definition);
+                    for (String def : definition) {
+                        String[] keywords = def.split("\\s+");
+
+                        for (String keyword : keywords) {
+                            String cleanKeyword = keyword.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+
+                            if (cleanKeyword.isEmpty()) {
+                                continue;
+                            }
+                            this.definitionMap.computeIfAbsent(cleanKeyword, k -> new HashSet<>()).add(slang);
+                        }
+                    }
+                } catch (ArrayIndexOutOfBoundsException err) {
+                    System.err.println("Error: Skip line " + lineNumber + " cause the issue when analysis: " + line);
                 }
-                allData.add(parts);
+                System.out.println("Loaded data successfully from text file: " + filePath);
             }
 
             br.close();
@@ -91,27 +100,42 @@ public class SlangDictionary implements Serializable {
         }
     }
 
-    public void saveToFile(String filePath) {
+    /**
+     * @param filePath
+     * @throws IOException
+     */
+    public void saveToFile(String filePath) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(filePath);
                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(this);
-        } catch (IOException ioe) {
-            System.err.println("An error when save file: " + ioe.getMessage());
-            ioe.printStackTrace();
+            System.out.println("Loaded the dictionary to file :" + filePath);
         }
     }
 
+    /**
+     * @param filePath
+     * @return SlangDictionary
+     */
     public static SlangDictionary loadFromSerializedFile(String filePath) {
-        SlangDictionary dictionary = null;
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            System.out.println("File not found " + filePath + ". Try to load data from text file.");
+            return null;
+        }
 
         try (FileInputStream fis = new FileInputStream(filePath);
                 ObjectInputStream ois = new ObjectInputStream(fis)) {
-            dictionary = (SlangDictionary) ois.readObject();
-        } catch (IOException | ClassNotFoundException exc) {
+            SlangDictionary dictionary = (SlangDictionary) ois.readObject();
+            System.out.println("Loaded dictionary successfully from file: " + filePath);
+            return dictionary;
+        } catch (ClassNotFoundException exc) {
             System.out.println("File not found at " + filePath + ". Try to load from txt.");
+            return null;
+        } catch (IOException ioe) {
+            System.out.println("File " + filePath + "can not be readed!");
+            return null;
         }
-
-        return dictionary;
     }
 
     public void testFiveLines() {
@@ -123,5 +147,51 @@ public class SlangDictionary implements Serializable {
         this.definitionMap.entrySet().stream().limit(5).forEach(entry -> {
             System.out.println("  Keyword: " + entry.getKey() + " -> " + entry.getValue());
         });
+    }
+
+    /**
+     * @param filePath
+     * @return true or false
+     */
+    public static boolean resetDictionaryFile(String filePath) {
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            System.out.println("File " + filePath + " not found.");
+            return true;
+        }
+
+        try {
+            if (file.delete()) {
+                System.out.println("Deleted file " + filePath + " successfully.");
+                return true;
+            } else {
+                System.err.println("Can not delete file " + filePath + "!");
+                return false;
+            }
+        } catch (SecurityException se) {
+            System.err.println("Security error: Do not have permission to delete file " + filePath + "!");
+            se.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * @param slang
+     * @return definitionList
+     */
+    public List<String> searchSlang(String slang) {
+        if (slang == null) {
+            return Collections.emptyList();
+        }
+        this.searchHistory.add(slang);
+
+        List<String> definitions = this.slangMap.get(slang);
+
+        if (definitions == null) {
+            return Collections.emptyList();
+        }
+
+        return definitions;
     }
 }
