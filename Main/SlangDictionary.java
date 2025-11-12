@@ -71,16 +71,7 @@ public class SlangDictionary implements Serializable {
                 }
                 System.out.println("Loaded data successfully from text file: " + filePath);
             }
-
             br.close();
-
-            // // print Data
-            // for (String[] row : allData) {
-            // for (String cell : row) {
-            // System.out.print(cell + "\t");
-            // }
-            // System.out.println();
-            // }
 
             // print HashMaps
             System.out.println("slangMap:");
@@ -108,7 +99,7 @@ public class SlangDictionary implements Serializable {
         try (FileOutputStream fos = new FileOutputStream(filePath);
                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(this);
-            System.out.println("Loaded the dictionary to file :" + filePath);
+            System.out.println("Saved the dictionary to file: " + filePath);
         }
     }
 
@@ -153,7 +144,7 @@ public class SlangDictionary implements Serializable {
      * @param filePath
      * @return true or false
      */
-    public static boolean resetDictionaryFile(String filePath) {
+    public boolean resetDictionaryFile(String filePath) {
         File file = new File(filePath);
 
         if (!file.exists()) {
@@ -193,5 +184,118 @@ public class SlangDictionary implements Serializable {
         }
 
         return definitions;
+    }
+
+    /**
+     * @param definition
+     * @return slangSet
+     */
+    public Set<String> searchDefinition(String definition) {
+        if (definition == null) {
+            return Collections.emptySet();
+        }
+        this.searchHistory.add(definition);
+
+        definition = definition.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+
+        if (definition.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Set<String> slangs = this.definitionMap.get(definition);
+
+        if (slangs == null) {
+            return Collections.emptySet();
+        }
+
+        return slangs;
+    }
+
+    public void showHistory() {
+        System.out.println("======> Search history:");
+        for (String searched : searchHistory) {
+            System.out.println(searched);
+        }
+        System.out.println("==========================================");
+    }
+
+    /**
+     * Helpers
+     */
+    private void addDefinitionsToIndex(String slang, List<String> definitions) {
+        for (String def : definitions) {
+            String[] keywords = def.split("\\s+");
+            for (String keyword : keywords) {
+                String cleanKeyword = keyword.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+                if (!cleanKeyword.isEmpty()) {
+                    this.definitionMap.computeIfAbsent(cleanKeyword, k -> new HashSet<>()).add(slang);
+                }
+            }
+        }
+    }
+
+    private void removeDefinitionsFromIndex(String slang, List<String> oldDefinitions) {
+        for (String def : oldDefinitions) {
+            String[] keywords = def.split("\\s+");
+            for (String keyword : keywords) {
+                String cleanKeyword = keyword.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+                if (cleanKeyword.isEmpty()) {
+                    continue;
+                }
+
+                Set<String> slangs = this.definitionMap.get(cleanKeyword);
+                if (slangs != null) {
+                    slangs.remove(slang);
+                    if (slangs.isEmpty()) {
+                        this.definitionMap.remove(cleanKeyword);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param slang
+     * @return true/false
+     */
+    public boolean checkSlangExists(String slang) {
+        return this.slangMap.containsKey(slang);
+    }
+
+    /**
+     * @param slang
+     * @param definitions
+     */
+    public void addNewSlang(String slang, List<String> definitions) {
+        this.slangMap.put(slang, definitions);
+        this.addDefinitionsToIndex(slang, definitions);
+        System.out.println("Aded a new slang " + slang + " and saved.");
+    }
+
+    /**
+     * @param slang
+     * @param newDefinitions
+     */
+    public void overwriteSlang(String slang, List<String> newDefinitions) {
+        List<String> oldDefinitions = this.slangMap.get(slang);
+        if (oldDefinitions != null) {
+            this.removeDefinitionsFromIndex(slang, oldDefinitions);
+        }
+        this.slangMap.put(slang, newDefinitions);
+        this.addDefinitionsToIndex(slang, newDefinitions);
+        System.out.println("Overwrited slang " + slang + " and saved.");
+    }
+
+    /**
+     * @param slang
+     * @param additionalDefinitions
+     */
+    public void duplicateSlang(String slang, List<String> additionalDefinitions) {
+        List<String> oldDefinitions = this.slangMap.get(slang);
+        List<String> combineDefinitions = new ArrayList<>(oldDefinitions);
+        combineDefinitions.addAll(additionalDefinitions);
+        this.addDefinitionsToIndex(slang, additionalDefinitions);
+        this.slangMap.put(slang, combineDefinitions);
+        System.out.println("Added the new definitions for slang " + slang + " and saved.");
     }
 }
