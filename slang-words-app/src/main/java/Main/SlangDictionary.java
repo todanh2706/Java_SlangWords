@@ -15,8 +15,10 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Collections;
+import java.util.Map;
 
 public class SlangDictionary implements Serializable {
     public static final long serialVersionUID = 1L;
@@ -330,5 +332,31 @@ public class SlangDictionary implements Serializable {
      * @param slang
      */
     public void deleteSlang(String slang) {
+        if (slang == null)
+            return;
+        if (this.slangMap.containsKey(slang) == false) {
+            System.out.println("Slang not found in slang map!");
+            return;
+        }
+        if (this.definitionMap.containsValue(slang) == false) {
+            System.out.println("Slang not found in definition map!");
+            return;
+        }
+
+        this.slangMap.remove(slang);
+
+        Iterator<Map.Entry<String, Set<String>>> iterator = this.definitionMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Set<String>> entry = iterator.next();
+            Set<String> def = entry.getValue();
+
+            if (def.contains(slang)) {
+                if (def.size() == 1) {
+                    iterator.remove();
+                } else {
+                    def.remove(slang);
+                }
+            }
+        }
     }
 }
