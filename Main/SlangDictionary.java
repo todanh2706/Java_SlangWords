@@ -21,6 +21,9 @@ import java.util.Collections;
 public class SlangDictionary implements Serializable {
     public static final long serialVersionUID = 1L;
 
+    private String textFilePath = "";
+    private String serializedFilePath = "dictionary.ser";
+
     private HashMap<String, List<String>> slangMap; /* ">": ["Frustration"] */
     private HashMap<String, Set<String>> definitionMap; /* "Frustration": Set {">"} */
     private List<String> searchHistory;
@@ -33,10 +36,24 @@ public class SlangDictionary implements Serializable {
 
     /**
      * @param filePath
+     */
+    public void setTextFilePath(String textFilePath) {
+        this.textFilePath = textFilePath;
+    }
+
+    /**
+     * @param filePath
+     */
+    public void setSerializedFilePath(String serializedFilePath) {
+        this.serializedFilePath = serializedFilePath;
+    }
+
+    /**
+     * @param filePath
      * @throws IOException
      */
-    public void loadFromFile(String filePath) throws IOException {
-        try (FileReader fileReader = new FileReader(filePath);
+    public void loadFromFile() throws IOException {
+        try (FileReader fileReader = new FileReader(this.textFilePath);
                 BufferedReader br = new BufferedReader(fileReader)) {
             br.readLine();
 
@@ -69,7 +86,7 @@ public class SlangDictionary implements Serializable {
                 } catch (ArrayIndexOutOfBoundsException err) {
                     System.err.println("Error: Skip line " + lineNumber + " cause the issue when analysis: " + line);
                 }
-                System.out.println("Loaded data successfully from text file: " + filePath);
+                System.out.println("Loaded data successfully from text file: " + this.textFilePath);
             }
             br.close();
 
@@ -93,13 +110,16 @@ public class SlangDictionary implements Serializable {
 
     /**
      * @param filePath
-     * @throws IOException
      */
-    public void saveToFile(String filePath) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(filePath);
-                ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+    public void saveToFile() {
+        try {
+            FileOutputStream fos = new FileOutputStream(this.serializedFilePath);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(this);
-            System.out.println("Saved the dictionary to file: " + filePath);
+            System.out.println("Saved the dictionary to file: " + this.serializedFilePath);
+            oos.close();
+        } catch (IOException ioe) {
+            System.out.println("An error occures: " + ioe.getMessage());
         }
     }
 
@@ -141,27 +161,27 @@ public class SlangDictionary implements Serializable {
     }
 
     /**
-     * @param filePath
      * @return true or false
      */
-    public boolean resetDictionaryFile(String filePath) {
-        File file = new File(filePath);
+    public boolean resetDictionaryFile() {
+        File file = new File(this.serializedFilePath);
 
         if (!file.exists()) {
-            System.out.println("File " + filePath + " not found.");
+            System.out.println("File " + this.serializedFilePath + " not found.");
             return true;
         }
 
         try {
             if (file.delete()) {
-                System.out.println("Deleted file " + filePath + " successfully.");
+                System.out.println("Deleted file " + this.serializedFilePath + " successfully.");
                 return true;
             } else {
-                System.err.println("Can not delete file " + filePath + "!");
+                System.err.println("Can not delete file " + this.serializedFilePath + "!");
                 return false;
             }
         } catch (SecurityException se) {
-            System.err.println("Security error: Do not have permission to delete file " + filePath + "!");
+            System.err
+                    .println("Security error: Do not have permission to delete file " + this.serializedFilePath + "!");
             se.printStackTrace();
             return false;
         }
@@ -297,5 +317,11 @@ public class SlangDictionary implements Serializable {
         this.addDefinitionsToIndex(slang, additionalDefinitions);
         this.slangMap.put(slang, combineDefinitions);
         System.out.println("Added the new definitions for slang " + slang + " and saved.");
+    }
+
+    /**
+     * @param slang
+     */
+    public void deleteSlang(String slang) {
     }
 }

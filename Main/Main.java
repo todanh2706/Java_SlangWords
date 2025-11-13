@@ -8,8 +8,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class Main {
-    private String textFilePath = "";
-    private String serializedFilePath = "";
 
     void handleChoose(Integer choice, SlangDictionary sd, Scanner scanner) {
         try {
@@ -20,13 +18,14 @@ public class Main {
 
                 case 1:
                     System.out.println("Deleting the .ser file...");
-                    sd.resetDictionaryFile(serializedFilePath);
+                    sd.resetDictionaryFile();
                     System.out.println("Deleted the .ser file successfully.");
                     break;
 
                 case 2:
                     System.out.print("Enter the new text file path: ");
-                    this.textFilePath = scanner.nextLine();
+                    String textFilePath = scanner.nextLine();
+                    sd.setTextFilePath(textFilePath);
                     System.out.println("Updated the text file path successfully.");
                     break;
 
@@ -45,7 +44,7 @@ public class Main {
                         }
                         System.out.println("=================");
                     }
-                    sd.saveToFile(serializedFilePath);
+                    sd.saveToFile();
                     break;
 
                 case 4:
@@ -63,7 +62,7 @@ public class Main {
                         }
                         System.out.print("\n");
                     }
-                    sd.saveToFile(serializedFilePath);
+                    sd.saveToFile();
                     break;
 
                 case 5:
@@ -111,17 +110,12 @@ public class Main {
                         } while (c < 0 || c > 2);
                         System.out.println("Closed the process.");
                     }
-                    sd.saveToFile(serializedFilePath);
+                    sd.saveToFile();
                     break;
 
                 default:
                     break;
             }
-        } catch (FileNotFoundException err) {
-            System.err.println("The source text file not foun: " + err.getMessage());
-        } catch (IOException ioe) {
-            System.err.println("An IO error occures: " + ioe.getMessage());
-            ioe.printStackTrace();
         } catch (Exception err) {
             System.err.println("An error occures:");
             err.printStackTrace();
@@ -129,19 +123,26 @@ public class Main {
     }
 
     public static void main(String args[]) {
-        Scanner scanner = new Scanner(System.in);
         Main myApp = new Main();
-        myApp.textFilePath = "slang.txt";
-        myApp.serializedFilePath = "dictionary.ser";
+        Scanner scanner = new Scanner(System.in);
+        String textFilePath = "slang.txt";
+        final String serializedFilePath = "dictionary.ser";
         int choice;
         try {
 
-            SlangDictionary sd = SlangDictionary.loadFromSerializedFile(myApp.serializedFilePath);
+            SlangDictionary sd = SlangDictionary.loadFromSerializedFile(serializedFilePath);
 
             if (sd == null) {
                 sd = new SlangDictionary();
-                sd.loadFromFile(myApp.textFilePath);
-                sd.saveToFile(myApp.serializedFilePath);
+                sd.setSerializedFilePath(serializedFilePath);
+                System.out.print("Enter the text file path: ");
+                textFilePath = scanner.nextLine();
+                sd.setTextFilePath(textFilePath);
+                sd.loadFromFile();
+                sd.saveToFile();
+            } else {
+                sd.setSerializedFilePath(serializedFilePath);
+                sd.setTextFilePath(textFilePath);
             }
 
             System.out.println("\n The Dictionary is ready.");
