@@ -359,4 +359,24 @@ public class SlangDictionary implements Serializable {
             }
         }
     }
+
+    /**
+     * @param originalKey
+     * @param newKey
+     * @param newDefinitions
+     */
+    public void editSlang(String originalKey, String newKey, List<String> newDefinitions) {
+        List<String> oldDefinitions = this.slangMap.get(originalKey);
+
+        if (oldDefinitions != null) {
+            this.removeDefinitionsFromIndex(originalKey, oldDefinitions);
+        }
+
+        this.slangMap.remove(originalKey);
+        this.slangMap.put(newKey, newDefinitions);
+
+        this.addDefinitionsToIndex(newKey, newDefinitions);
+
+        System.out.println("Slang was edited. The original slang: " + originalKey + ", The new slang: " + newKey);
+    }
 }

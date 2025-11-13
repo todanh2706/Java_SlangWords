@@ -1,13 +1,12 @@
 package Main;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -57,9 +56,10 @@ public class App extends Application {
         Tab searchTab = new Tab("Search", createSearchTab());
         Tab addTab = new Tab("Add Slang", createAddTab());
         Tab adminTab = new Tab("Admin", createAdminTab());
+        Tab editTab = new Tab("Edit Slang", createEditTab());
 
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        tabPane.getTabs().addAll(searchTab, addTab, adminTab);
+        tabPane.getTabs().addAll(searchTab, addTab, adminTab, editTab);
 
         root.setCenter(tabPane);
 
@@ -123,6 +123,92 @@ public class App extends Application {
 
         VBox layout = new VBox(10, resetBtn);
         layout.setPadding(new Insets(10));
+        return layout;
+    }
+
+    /**
+     * Edit slang tab
+     */
+    private VBox createEditTab() {
+        final AtomicReference<String> originalSlangKey = new AtomicReference<>();
+
+        TextField searchField = new TextField();
+        searchField.setPromptText("Enter the slang that you want to change...");
+        searchField.setPrefWidth(300);
+
+        Button findBtn = new Button("Find");
+        Button saveBtn = new Button("Save");
+        saveBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+
+        HBox searchBox = new HBox(10, searchField, findBtn);
+        searchBox.setAlignment(Pos.CENTER);
+
+        Label statusLabel = new Label();
+
+        Label slangLabel = new Label("Slang Word: ");
+        TextField slangField = new TextField();
+
+        Label defLabel = new Label("Definitions: ");
+        TextArea definitionsArea = new TextArea();
+        definitionsArea.setWrapText(true);
+
+        VBox editForm = new VBox(10, slangLabel, slangField, defLabel, definitionsArea, saveBtn, statusLabel);
+        editForm.setVisible(false);
+
+        findBtn.setOnAction(e -> {
+            String slangToFind = searchField.getText().trim();
+            if (slangToFind.isEmpty()) {
+                statusLabel.setText("Please enter a slang to find: ");
+                editForm.setVisible(false);
+                return;
+            }
+
+            if (this.dictionary.checkSlangExists(slangToFind)) {
+                originalSlangKey.set(slangToFind);
+
+                List<String> defs = this.dictionary.searchSlang(slangToFind);
+
+                slangField.setText(slangToFind);
+                definitionsArea.setText(String.join("\n", defs));
+
+                statusLabel.setText("Slang found. You can edit it now.");
+                editForm.setVisible(true);
+            } else {
+                statusLabel.setText("Slang " + slangToFind + " no found!");
+                editForm.setVisible(false);
+                originalSlangKey.set(null);
+            }
+        });
+
+        saveBtn.setOnAction(e -> {
+            String originalKey = originalSlangKey.get();
+            String newKey = slangField.getText().trim();
+            String newDefsText = definitionsArea.getText().trim();
+
+            if (originalKey == null || newKey.isEmpty() || newDefsText.isEmpty()) {
+                statusLabel.setText("Error: Can not save. Slang or definitions are empty!");
+                return;
+            }
+
+            List<String> newDefinitions;
+            if (newDefsText.isEmpty()) {
+                newDefinitions = Collections.emptyList();
+            } else {
+                newDefinitions = Arrays.asList(newDefsText.split("\\r?\\n"));
+            }
+
+            this.dictionary.editSlang(originalKey, newKey, newDefinitions);
+
+            statusLabel.setText("Slang " + originalKey + " updated successfully!");
+            editForm.setVisible(false);
+            originalSlangKey.set(null);
+            searchField.clear();
+        });
+
+        VBox layout = new VBox(20, searchBox, editForm);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.TOP_CENTER);
+
         return layout;
     }
 
