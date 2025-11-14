@@ -19,6 +19,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Map;
+import java.time.LocalDate;
+import java.util.AbstractMap;
+import java.util.Random;
 
 public class SlangDictionary implements Serializable {
     public static final long serialVersionUID = 1L;
@@ -29,6 +32,9 @@ public class SlangDictionary implements Serializable {
     private HashMap<String, List<String>> slangMap; /* ">": ["Frustration"] */
     private HashMap<String, Set<String>> definitionMap; /* "Frustration": Set {">"} */
     private List<String> searchHistory;
+
+    private String randomSlangOfDay;
+    private LocalDate dateOfRandomSlang;
 
     public SlangDictionary() {
         this.slangMap = new LinkedHashMap<>();
@@ -378,5 +384,29 @@ public class SlangDictionary implements Serializable {
         this.addDefinitionsToIndex(newKey, newDefinitions);
 
         System.out.println("Slang was edited. The original slang: " + originalKey + ", The new slang: " + newKey);
+    }
+
+    public Map.Entry<String, List<String>> getSlangOfTheDay() {
+        LocalDate today = LocalDate.now();
+
+        if (today.equals(dateOfRandomSlang) && randomSlangOfDay != null
+                && this.slangMap.containsKey(randomSlangOfDay)) {
+            List<String> definitions = this.slangMap.get(randomSlangOfDay);
+            return new AbstractMap.SimpleEntry<>(randomSlangOfDay, definitions);
+        }
+
+        if (this.slangMap == null || this.slangMap.isEmpty()) {
+            return new AbstractMap.SimpleEntry<>("Error", List.of("Empty dictionary."));
+        }
+
+        List<String> keys = new ArrayList<>(this.slangMap.keySet());
+        Random rand = new Random();
+        this.randomSlangOfDay = keys.get(rand.nextInt(keys.size()));
+        this.dateOfRandomSlang = today;
+
+        System.out.println("Selected slang for a new day: " + this.randomSlangOfDay);
+
+        List<String> definitions = this.slangMap.get(this.randomSlangOfDay);
+        return new AbstractMap.SimpleEntry<>(this.randomSlangOfDay, definitions);
     }
 }
