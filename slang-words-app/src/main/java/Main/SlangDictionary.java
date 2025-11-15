@@ -224,19 +224,24 @@ public class SlangDictionary implements Serializable {
         }
         this.searchHistory.add(definition);
 
-        definition = definition.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        Set<String> finalSlangSet = new HashSet<>();
+        String[] keywords = definition.split("\\s+");
 
-        if (definition.isEmpty()) {
-            return Collections.emptySet();
+        for (String keyword : keywords) {
+            String cleanKeyword = keyword.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+
+            if (cleanKeyword.isEmpty()) {
+                continue;
+            }
+
+            Set<String> slangs = this.definitionMap.get(cleanKeyword);
+
+            if (slangs != null) {
+                finalSlangSet.addAll(slangs);
+            }
         }
 
-        Set<String> slangs = this.definitionMap.get(definition);
-
-        if (slangs == null) {
-            return Collections.emptySet();
-        }
-
-        return slangs;
+        return finalSlangSet;
     }
 
     public void showHistory() {
