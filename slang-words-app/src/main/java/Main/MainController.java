@@ -23,6 +23,16 @@ public class MainController {
     private StringProperty editStatus = new SimpleStringProperty();
     private BooleanProperty editFormVisible = new SimpleBooleanProperty(false);
 
+    private StringProperty quizQuestion = new SimpleStringProperty("Click 'New Question' to start.");
+    private StringProperty quizOption1 = new SimpleStringProperty();
+    private StringProperty quizOption2 = new SimpleStringProperty();
+    private StringProperty quizOption3 = new SimpleStringProperty();
+    private StringProperty quizOption4 = new SimpleStringProperty();
+    private StringProperty quizStatus = new SimpleStringProperty();
+    private List<String> correctAnswers;
+    private ToggleGroup quizToggleGroup = new ToggleGroup();
+    private BooleanProperty quizHasStarted = new SimpleBooleanProperty(false);
+
     // Original key keeper (editing feature)
     private AtomicReference<String> originalSlangKey = new AtomicReference<>();
 
@@ -53,6 +63,38 @@ public class MainController {
 
     public BooleanProperty editFormVisibleProperty() {
         return editFormVisible;
+    }
+
+    public StringProperty quizQuestionProperty() {
+        return quizQuestion;
+    }
+
+    public StringProperty quizOption1Property() {
+        return quizOption1;
+    }
+
+    public StringProperty quizOption2Property() {
+        return quizOption2;
+    }
+
+    public StringProperty quizOption3Property() {
+        return quizOption3;
+    }
+
+    public StringProperty quizOption4Property() {
+        return quizOption4;
+    }
+
+    public StringProperty quizStatusProperty() {
+        return quizStatus;
+    }
+
+    public ToggleGroup getQuizToggleGroup() {
+        return quizToggleGroup;
+    }
+
+    public BooleanProperty quizHasStartedProperty() {
+        return quizHasStarted;
     }
 
     // ------------------ Event handler ------------------
@@ -231,5 +273,62 @@ public class MainController {
         editStatus.set("Slang '" + originalKey + "' updated successfully!");
         editFormVisible.set(false);
         originalSlangKey.set(null);
+    }
+
+    public void loadNewQuizQuestion() {
+        Map.Entry<String, List<String>> questionEntry = dictionary.randomPickSlang();
+        String slangQuestion = questionEntry.getKey();
+
+        this.correctAnswers = questionEntry.getValue();
+        String correctAnswer = this.correctAnswers.get(0);
+
+        List<String> wrongAnswers = dictionary.randomPickDefinitions(this.correctAnswers);
+
+        List<String> options = new ArrayList<>();
+        options.add(correctAnswer);
+        options.addAll(wrongAnswers);
+        if (options.size() != 0) {
+            System.out.println("Check options:");
+            System.out.println("Option 1: " + options.get(0));
+            System.out.println("Option 2: " + options.get(1));
+        }
+
+        Collections.shuffle(options);
+
+        quizQuestion.set("What does '" + slangQuestion + "' mean?");
+        quizOption1.set(options.get(0));
+        quizOption2.set(options.get(1));
+        quizOption3.set(options.get(2));
+        quizOption4.set(options.get(3));
+
+        quizStatus.set("");
+        if (quizToggleGroup.getSelectedToggle() != null) {
+            quizToggleGroup.getSelectedToggle().setSelected(false);
+        }
+    }
+
+    public void handleSubmitQuiz() {
+        Toggle selectedToggle = quizToggleGroup.getSelectedToggle();
+
+        if (selectedToggle == null) {
+            quizStatus.set("Please select 1 answer!");
+            return;
+        }
+
+        String selectedAnswer = ((RadioButton) selectedToggle).getText();
+
+        if (this.correctAnswers.contains(selectedAnswer)) {
+            quizStatus.set("Congratulation! Your answer is correct!!!!");
+        } else {
+            quizStatus.set("Oh no! Your answer is incorrect!!!!");
+        }
+    }
+
+    /**
+     * Start quiz handler
+     */
+    public void handleStartQuiz() {
+        quizHasStarted.set(true);
+        loadNewQuizQuestion();
     }
 }

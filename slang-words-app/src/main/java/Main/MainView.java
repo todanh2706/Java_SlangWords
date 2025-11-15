@@ -30,9 +30,11 @@ public class MainView {
         Tab addTab = new Tab("Add Slang", createAddTab());
         Tab adminTab = new Tab("Admin", createAdminTab());
         Tab editTab = new Tab("Edit Slang", createEditTab());
+        Parent quizTabContent = createQuizTab();
+        Tab quizTab = new Tab("Fun Quiz", quizTabContent);
 
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        tabPane.getTabs().addAll(searchTab, addTab, adminTab, editTab);
+        tabPane.getTabs().addAll(searchTab, addTab, adminTab, editTab, quizTab);
 
         root.setCenter(tabPane);
 
@@ -71,6 +73,69 @@ public class MainView {
         VBox.setVgrow(resultsView, Priority.ALWAYS);
 
         return layout;
+    }
+
+    /**
+     * Create quiz tab
+     */
+    private Parent createQuizTab() {
+        Label welcomeLabel = new Label("Welcome to our mini quiz, are you ready?");
+        welcomeLabel.setStyle("-fx-font-size: 16px;");
+
+        Button startBtn = new Button("Start");
+        startBtn.setStyle("-fx-font-size: 16px");
+        startBtn.setOnAction(e -> controller.handleStartQuiz());
+
+        VBox welcomeLayout = new VBox(20, welcomeLabel, startBtn);
+        welcomeLayout.setAlignment(Pos.CENTER);
+
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.TOP_LEFT);
+
+        Label questionLabel = new Label();
+        questionLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold");
+        questionLabel.textProperty().bind(controller.quizQuestionProperty());
+
+        ToggleGroup optionsGroup = controller.getQuizToggleGroup();
+
+        RadioButton option1 = new RadioButton();
+        option1.setToggleGroup(optionsGroup);
+        option1.textProperty().bind(controller.quizOption1Property());
+
+        RadioButton option2 = new RadioButton();
+        option2.setToggleGroup(optionsGroup);
+        option2.textProperty().bind(controller.quizOption2Property());
+
+        RadioButton option3 = new RadioButton();
+        option3.setToggleGroup(optionsGroup);
+        option3.textProperty().bind(controller.quizOption3Property());
+
+        RadioButton option4 = new RadioButton();
+        option4.setToggleGroup(optionsGroup);
+        option4.textProperty().bind(controller.quizOption4Property());
+
+        Button submitBtn = new Button("Submit");
+        Button nextBtn = new Button("New Question");
+
+        submitBtn.setOnAction(e -> controller.handleSubmitQuiz());
+        nextBtn.setOnAction(e -> controller.loadNewQuizQuestion());
+
+        HBox buttonBox = new HBox(10, submitBtn, nextBtn);
+
+        Label statusLabel = new Label();
+        statusLabel.setStyle("-fx-font-weight: bold;");
+        statusLabel.textProperty().bind(controller.quizStatusProperty());
+
+        layout.getChildren().addAll(questionLabel, option1, option2, option3, option4, buttonBox, statusLabel);
+
+        StackPane root = new StackPane();
+        root.getChildren().addAll(welcomeLayout, layout);
+
+        welcomeLayout.visibleProperty().bind(controller.quizHasStartedProperty().not());
+        layout.visibleProperty().bind(controller.quizHasStartedProperty());
+
+        return root;
     }
 
     /**

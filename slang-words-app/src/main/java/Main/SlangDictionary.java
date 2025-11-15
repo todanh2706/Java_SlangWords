@@ -409,4 +409,57 @@ public class SlangDictionary implements Serializable {
         List<String> definitions = this.slangMap.get(this.randomSlangOfDay);
         return new AbstractMap.SimpleEntry<>(this.randomSlangOfDay, definitions);
     }
+
+    /**
+     * Pick random slang for question
+     * 
+     * @return
+     */
+    public Map.Entry<String, List<String>> randomPickSlang() {
+        if (this.slangMap == null || this.slangMap.isEmpty()) {
+            return new AbstractMap.SimpleEntry<>("Error", List.of("Empty dictionary!"));
+        }
+
+        List<String> slangKeys = new ArrayList<>(this.slangMap.keySet());
+
+        Random rand = new Random();
+        String randomSlang = slangKeys.get(rand.nextInt(slangKeys.size()));
+
+        List<String> definitions = this.slangMap.get(randomSlang);
+
+        return new AbstractMap.SimpleEntry<>(randomSlang, definitions);
+    }
+
+    /**
+     * Pick other answer for question
+     * 
+     * @param definitionsToAvoid
+     * @return
+     */
+    public List<String> randomPickDefinitions(List<String> definitionsToAvoid) {
+        if (this.slangMap == null || this.slangMap.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> allDefinitionsPool = new HashSet<>();
+        for (List<String> defsList : this.slangMap.values()) {
+            allDefinitionsPool.addAll(defsList);
+        }
+
+        Set<String> avoidSet = new HashSet<>(definitionsToAvoid);
+
+        List<String> wrongAnswersPool = new ArrayList<>();
+        for (String def : allDefinitionsPool) {
+            if (!avoidSet.contains(def)) {
+                wrongAnswersPool.add(def);
+            }
+        }
+
+        if (wrongAnswersPool.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Collections.shuffle(wrongAnswersPool);
+        return new ArrayList<>(wrongAnswersPool.subList(0, 3));
+    }
 }
