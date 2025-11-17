@@ -30,8 +30,9 @@ public class MainController {
     private StringProperty quizOption4 = new SimpleStringProperty();
     private StringProperty quizStatus = new SimpleStringProperty();
     private List<String> correctAnswers;
+    private String primaryCorrectAnswer;
     private ToggleGroup quizToggleGroup = new ToggleGroup();
-    private BooleanProperty quizHasStarted = new SimpleBooleanProperty(false);
+    private IntegerProperty quizState = new SimpleIntegerProperty(0);
 
     // Original key keeper (editing feature)
     private AtomicReference<String> originalSlangKey = new AtomicReference<>();
@@ -93,8 +94,8 @@ public class MainController {
         return quizToggleGroup;
     }
 
-    public BooleanProperty quizHasStartedProperty() {
-        return quizHasStarted;
+    public IntegerProperty quizStateProperty() {
+        return quizState;
     }
 
     // ------------------ Event handler ------------------
@@ -275,7 +276,7 @@ public class MainController {
         originalSlangKey.set(null);
     }
 
-    public void loadNewQuizQuestion() {
+    public void loadNewSlangQuiz() {
         Map.Entry<String, List<String>> questionEntry = dictionary.randomPickSlang();
         String slangQuestion = questionEntry.getKey();
 
@@ -315,6 +316,37 @@ public class MainController {
         }
     }
 
+    public void loadNewDefinitionQuiz() {
+        List<Map.Entry<String, List<String>>> entries = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            entries.add(dictionary.randomPickSlang());
+        }
+
+        Map.Entry<String, List<String>> correctEntry = entries.get(0);
+        String definitionQuestion = correctEntry.getValue().get(0);
+        this.primaryCorrectAnswer = correctEntry.getKey();
+
+        this.correctAnswers = new ArrayList<>();
+
+        List<String> options = new ArrayList<>();
+        for (var entry : entries) {
+            options.add(entry.getKey());
+        }
+
+        Collections.shuffle(options);
+
+        quizQuestion.set("Which slang matches the definition '" + definitionQuestion + "'?");
+        quizOption1.set(options.get(0));
+        quizOption2.set(options.get(1));
+        quizOption3.set(options.get(2));
+        quizOption4.set(options.get(3));
+
+        quizStatus.set("");
+        if (quizToggleGroup.getSelectedToggle() != null) {
+            quizToggleGroup.getSelectedToggle().setSelected(false);
+        }
+    }
+
     public void handleSubmitQuiz() {
         Toggle selectedToggle = quizToggleGroup.getSelectedToggle();
 
@@ -333,10 +365,37 @@ public class MainController {
     }
 
     /**
-     * Start quiz handler
+     * Start slang quiz handler
      */
-    public void handleStartQuiz() {
-        quizHasStarted.set(true);
-        loadNewQuizQuestion();
+    public void handleStartSlangQuiz() {
+        quizState.set(1);
+        loadNewSlangQuiz();
+    }
+
+    /**
+     * Start definition quiz handler
+     */
+    public void handleStartDefinitionQuiz() {
+        quizState.set(2);
+        loadNewDefinitionQuiz();
+    }
+
+    /**
+     * Close quiz handler
+     */
+    public void handleQuitQuiz() {
+        quizState.set(0);
+        quizStatus.set("");
+    }
+
+    /**
+     * Handle new question
+     */
+    public void handleNextQuestion() {
+        if (quizState.get() == 1) {
+            loadNewSlangQuiz();
+        } else if (quizState.get() == 2) {
+            loadNewDefinitionQuiz();
+        }
     }
 }

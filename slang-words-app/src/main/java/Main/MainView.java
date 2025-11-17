@@ -82,11 +82,21 @@ public class MainView {
         Label welcomeLabel = new Label("Welcome to our mini quiz, are you ready?");
         welcomeLabel.setStyle("-fx-font-size: 16px;");
 
-        Button startBtn = new Button("Start");
-        startBtn.setStyle("-fx-font-size: 16px");
-        startBtn.setOnAction(e -> controller.handleStartQuiz());
+        Label promptLabel = new Label("Choose your challenge:");
+        promptLabel.setStyle("-fx-font-size: 14px;");
 
-        VBox welcomeLayout = new VBox(20, welcomeLabel, startBtn);
+        Button slangQuizButton = new Button("Quiz: Slang -> Definition");
+        slangQuizButton.setPrefWidth(250);
+        slangQuizButton.setStyle("-fx-font-size: 14px;");
+
+        Button defQuizButton = new Button("Quiz: Definition -> Slang");
+        defQuizButton.setPrefWidth(250);
+        defQuizButton.setStyle("-fx-font-size: 14px;");
+
+        slangQuizButton.setOnAction(e -> controller.handleStartSlangQuiz());
+        defQuizButton.setOnAction(e -> controller.handleStartDefinitionQuiz());
+
+        VBox welcomeLayout = new VBox(20, welcomeLabel, promptLabel, slangQuizButton, defQuizButton);
         welcomeLayout.setAlignment(Pos.CENTER);
 
         VBox layout = new VBox(15);
@@ -117,11 +127,13 @@ public class MainView {
 
         Button submitBtn = new Button("Submit");
         Button nextBtn = new Button("New Question");
+        Button quitButton = new Button("End");
 
+        quitButton.setOnAction(e -> controller.handleQuitQuiz());
         submitBtn.setOnAction(e -> controller.handleSubmitQuiz());
-        nextBtn.setOnAction(e -> controller.loadNewQuizQuestion());
+        nextBtn.setOnAction(e -> controller.handleNextQuestion());
 
-        HBox buttonBox = new HBox(10, submitBtn, nextBtn);
+        HBox buttonBox = new HBox(10, submitBtn, nextBtn, quitButton);
 
         Label statusLabel = new Label();
         statusLabel.setStyle("-fx-font-weight: bold;");
@@ -132,8 +144,8 @@ public class MainView {
         StackPane root = new StackPane();
         root.getChildren().addAll(welcomeLayout, layout);
 
-        welcomeLayout.visibleProperty().bind(controller.quizHasStartedProperty().not());
-        layout.visibleProperty().bind(controller.quizHasStartedProperty());
+        welcomeLayout.visibleProperty().bind(controller.quizStateProperty().isEqualTo(0));
+        layout.visibleProperty().bind(controller.quizStateProperty().isNotEqualTo(0));
 
         return root;
     }
