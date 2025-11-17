@@ -179,31 +179,12 @@ public class MainView {
      * Create admin tab
      */
     private VBox createAdminTab() {
-        Label resetLabel = new Label("Reset dictionary using the *current* .txt file:");
+        Label resetLabel = new Label("Reset dictionary using the slang.txt file:");
         Button resetBtn = new Button("Reset Dictionary");
         resetBtn.setOnAction(e -> controller.handleResetDictionary());
         VBox resetBox = new VBox(5, resetLabel, resetBtn);
 
-        Separator separator = new Separator();
-        separator.setPadding(new Insets(10, 0, 10, 0));
-
-        Label changeFileLabel = new Label("Change and load from a *new* source .txt file:");
-        changeFileLabel.setStyle("-fx-font-weight: bold;");
-
-        TextField pathField = new TextField();
-        pathField.setPromptText("Enter new file path (e.g., data/new_slang.txt)");
-
-        Button loadNewFileBtn = new Button("Load From New File");
-
-        loadNewFileBtn.setOnAction(e -> {
-            boolean success = controller.handleChangeTextFile(pathField.getText());
-            if (success)
-                pathField.clear();
-        });
-
-        VBox changeFileBox = new VBox(5, changeFileLabel, pathField, loadNewFileBtn);
-
-        VBox layout = new VBox(10, resetBox, separator, changeFileBox);
+        VBox layout = new VBox(10, resetBox);
         layout.setPadding(new Insets(20));
 
         return layout;

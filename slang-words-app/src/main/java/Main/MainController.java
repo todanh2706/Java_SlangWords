@@ -398,38 +398,4 @@ public class MainController {
             loadNewDefinitionQuiz();
         }
     }
-
-    /**
-     * Change to new text file
-     * 
-     */
-    public boolean handleChangeTextFile(String newTextPath) {
-        if (newTextPath == null || newTextPath.trim().isEmpty()) {
-            AlertUtil.showAlert(AlertType.WARNING, "Input Error", "File path cannot be empty.");
-            return false;
-        }
-
-        String trimmedPath = newTextPath.trim();
-
-        dictionary.setTextFilePath(trimmedPath);
-
-        try {
-            dictionary.loadFromFile();
-
-            AlertUtil.showAlert(AlertType.INFORMATION, "Success",
-                    "Dictionary reloaded successfully from:\n" + trimmedPath);
-
-            resultsList.clear();
-            updateHistoryView();
-
-            return true;
-        } catch (IOException e) {
-            AlertUtil.showAlert(AlertType.ERROR, "Load Error",
-                    "Failed to load from new file: " + trimmedPath + "\nError: " + e.getMessage());
-            return false;
-        } catch (Exception e) {
-            AlertUtil.showAlert(AlertType.ERROR, "Error", "An unexpected error occurred: " + e.getMessage());
-            return false;
-        }
-    }
 }
