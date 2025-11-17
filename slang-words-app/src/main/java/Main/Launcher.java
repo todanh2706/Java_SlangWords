@@ -1,3 +1,7 @@
+/**
+ * @author Huu Danh, To
+ */
+
 package Main;
 
 import javafx.application.Application;

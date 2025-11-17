@@ -1,3 +1,7 @@
+/**
+ * @author Huu Danh, To
+ */
+
 package Main;
 
 import java.io.BufferedReader;
@@ -481,7 +485,7 @@ public class SlangDictionary implements Serializable {
         }
 
         if (wrongAnswersPool.isEmpty()) {
-            return "Không còn định nghĩa nào khác!";
+            return "Cannot find any other definition.";
         }
 
         Random rand = new Random();

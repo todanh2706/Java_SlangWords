@@ -16,6 +16,8 @@ public class App extends Application {
 
     /**
      * Model loading
+     * 
+     * @author Huu Danh, To
      */
     @Override
     public void init() throws Exception {
@@ -41,7 +43,9 @@ public class App extends Application {
     }
 
     /**
-     * Show Welcome screen (GEMINI)
+     * Show Welcome screen
+     * 
+     * @author Gemini 2.5 Pro
      */
     @Override
     public void start(Stage primaryStage) {
@@ -59,6 +63,8 @@ public class App extends Application {
 
     /**
      * Go to main
+     * 
+     * @author Huu Danh, To
      */
     public void showMainScreen() {
         MainController controller = new MainController(dictionary);
@@ -73,6 +79,8 @@ public class App extends Application {
 
     /**
      * Quit
+     *
+     * @author Huu Danh, To
      */
     public void quitApplication() {
         Platform.exit();
@@ -80,6 +88,8 @@ public class App extends Application {
 
     /**
      * Save model
+     *
+     * @author Huu Danh, To
      */
     @Override
     public void stop() throws Exception {

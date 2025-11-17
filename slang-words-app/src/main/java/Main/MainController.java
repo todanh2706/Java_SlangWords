@@ -1,3 +1,7 @@
+/**
+ * @author Huu Danh, To
+ */
+
 package Main;
 
 import java.io.IOException;
