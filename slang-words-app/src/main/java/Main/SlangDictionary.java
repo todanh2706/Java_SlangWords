@@ -61,6 +61,27 @@ public class SlangDictionary implements Serializable {
      * @throws IOException
      */
     public void loadFromFile() throws IOException {
+        if (this.slangMap != null) {
+            this.slangMap.clear();
+        } else {
+            this.slangMap = new LinkedHashMap<>();
+        }
+
+        if (this.definitionMap != null) {
+            this.definitionMap.clear();
+        } else {
+            this.definitionMap = new LinkedHashMap<>();
+        }
+
+        if (this.searchHistory != null) {
+            this.searchHistory.clear();
+        } else {
+            this.searchHistory = new ArrayList<>();
+        }
+
+        this.randomSlangOfDay = null;
+        this.dateOfRandomSlang = null;
+
         try (FileReader fileReader = new FileReader(this.textFilePath);
                 BufferedReader br = new BufferedReader(fileReader)) {
             br.readLine();
@@ -94,9 +115,10 @@ public class SlangDictionary implements Serializable {
                 } catch (ArrayIndexOutOfBoundsException err) {
                     System.err.println("Error: Skip line " + lineNumber + " cause the issue when analysis: " + line);
                 }
-                System.out.println("Loaded data successfully from text file: " + this.textFilePath);
             }
             br.close();
+
+            System.out.println("Loaded data successfully from text file: " + this.textFilePath);
 
             // print HashMaps
             System.out.println("slangMap:");
@@ -111,8 +133,6 @@ public class SlangDictionary implements Serializable {
                 System.out.println("  Slangs (Set): " + entry.getValue());
                 System.out.println("---");
             });
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
