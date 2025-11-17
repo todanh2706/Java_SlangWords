@@ -87,9 +87,4 @@ public class App extends Application {
         dictionary.saveToFile();
         System.out.println("Done. Goodbye!");
     }
-
-    // --------- Main --------- (GEMINI)
-    public static void main(String[] args) {
-        launch(args);
-    }
 }
