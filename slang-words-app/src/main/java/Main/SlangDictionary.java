@@ -441,9 +441,9 @@ public class SlangDictionary implements Serializable {
      * @param definitionsToAvoid
      * @return
      */
-    public List<String> randomPickDefinitions(List<String> definitionsToAvoid) {
+    public String randomPickDefinition(List<String> definitionsToAvoid) {
         if (this.slangMap == null || this.slangMap.isEmpty()) {
-            return Collections.emptyList();
+            return "Slang map is not initialized!";
         }
 
         Set<String> allDefinitionsPool = new HashSet<>();
@@ -461,10 +461,12 @@ public class SlangDictionary implements Serializable {
         }
 
         if (wrongAnswersPool.isEmpty()) {
-            return Collections.emptyList();
+            return "Không còn định nghĩa nào khác!";
         }
 
+        Random rand = new Random();
+
         Collections.shuffle(wrongAnswersPool);
-        return new ArrayList<>(wrongAnswersPool.subList(0, 3));
+        return wrongAnswersPool.get(rand.nextInt(wrongAnswersPool.size()));
     }
 }

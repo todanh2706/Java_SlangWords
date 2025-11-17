@@ -282,7 +282,15 @@ public class MainController {
         this.correctAnswers = questionEntry.getValue();
         String correctAnswer = this.correctAnswers.get(0);
 
-        List<String> wrongAnswers = dictionary.randomPickDefinitions(this.correctAnswers);
+        List<String> avoidList = new ArrayList<>();
+        avoidList.addAll(questionEntry.getValue());
+
+        List<String> wrongAnswers = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String wrongAnswer = this.dictionary.randomPickDefinition(avoidList);
+            wrongAnswers.add(wrongAnswer);
+            avoidList.add(wrongAnswer);
+        }
 
         List<String> options = new ArrayList<>();
         options.add(correctAnswer);
