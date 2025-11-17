@@ -282,6 +282,7 @@ public class MainController {
 
         this.correctAnswers = questionEntry.getValue();
         String correctAnswer = this.correctAnswers.get(0);
+        this.primaryCorrectAnswer = correctAnswer;
 
         List<String> avoidList = new ArrayList<>();
         avoidList.addAll(questionEntry.getValue());
@@ -296,11 +297,6 @@ public class MainController {
         List<String> options = new ArrayList<>();
         options.add(correctAnswer);
         options.addAll(wrongAnswers);
-        if (options.size() != 0) {
-            System.out.println("Check options:");
-            System.out.println("Option 1: " + options.get(0));
-            System.out.println("Option 2: " + options.get(1));
-        }
 
         Collections.shuffle(options);
 
@@ -317,21 +313,27 @@ public class MainController {
     }
 
     public void loadNewDefinitionQuiz() {
-        List<Map.Entry<String, List<String>>> entries = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            entries.add(dictionary.randomPickSlang());
-        }
 
-        Map.Entry<String, List<String>> correctEntry = entries.get(0);
+        Map.Entry<String, List<String>> correctEntry = dictionary.randomPickSlang();
         String definitionQuestion = correctEntry.getValue().get(0);
         this.primaryCorrectAnswer = correctEntry.getKey();
 
-        this.correctAnswers = new ArrayList<>();
+        Set<String> avoidSlangSet = dictionary.searchDefinition(definitionQuestion);
+        this.correctAnswers = new ArrayList<>(avoidSlangSet);
+
+        List<String> wrongAnswers = new ArrayList<>();
+
+        while (wrongAnswers.size() < 3) {
+            String potentialWrongSlang = dictionary.randomPickSlang().getKey();
+            if (!avoidSlangSet.contains(potentialWrongSlang)) {
+                wrongAnswers.add(potentialWrongSlang);
+                avoidSlangSet.add(potentialWrongSlang);
+            }
+        }
 
         List<String> options = new ArrayList<>();
-        for (var entry : entries) {
-            options.add(entry.getKey());
-        }
+        options.add(this.primaryCorrectAnswer);
+        options.addAll(wrongAnswers);
 
         Collections.shuffle(options);
 
@@ -360,7 +362,8 @@ public class MainController {
         if (this.correctAnswers.contains(selectedAnswer)) {
             quizStatus.set("Congratulation! Your answer is correct!!!!");
         } else {
-            quizStatus.set("Oh no! Your answer is incorrect!!!!");
+            quizStatus.set(
+                    "Oh no! Your answer is incorrect!!!! The correct answer is '" + this.primaryCorrectAnswer + "'.");
         }
     }
 

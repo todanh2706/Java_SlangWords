@@ -41,7 +41,7 @@ public class App extends Application {
     }
 
     /**
-     * Show Welcome screen
+     * Show Welcome screen (GEMINI)
      */
     @Override
     public void start(Stage primaryStage) {
@@ -88,7 +88,7 @@ public class App extends Application {
         System.out.println("Done. Goodbye!");
     }
 
-    // --------- Main ---------
+    // --------- Main --------- (GEMINI)
     public static void main(String[] args) {
         launch(args);
     }
