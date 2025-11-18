@@ -405,4 +405,31 @@ public class MainController {
             loadNewDefinitionQuiz();
         }
     }
+
+    public void handleDeleteSlang() {
+        String slangToDelete = originalSlangKey.get();
+        if (slangToDelete == null)
+            return;
+
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Delete");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure you want to delete '" + slangToDelete + "'?\nThis action cannot be undone.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            this.dictionary.deleteSlang(slangToDelete);
+
+            AlertUtil.showAlert(AlertType.INFORMATION, "Deleted",
+                    "Slang '" + slangToDelete + "' has been deleted successfully.");
+
+            editStatus.set("Slang deleted.");
+            editFormVisible.set(false);
+            originalSlangKey.set(null);
+
+            editSlangKey.set("");
+            editDefinitions.set("");
+        }
+    }
 }

@@ -403,10 +403,6 @@ public class SlangDictionary implements Serializable {
             System.out.println("Slang not found in slang map!");
             return;
         }
-        if (this.definitionMap.containsValue(slang) == false) {
-            System.out.println("Slang not found in definition map!");
-            return;
-        }
 
         this.slangMap.remove(slang);
 

@@ -205,6 +205,11 @@ public class MainView {
         Button findBtn = new Button("Find");
         Button saveBtn = new Button("Save");
         saveBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
+
+        HBox actionBox = new HBox(10, saveBtn, deleteBtn);
+        actionBox.setAlignment(Pos.CENTER_LEFT);
 
         HBox searchBox = new HBox(10, searchField, findBtn);
         searchBox.setAlignment(Pos.CENTER);
@@ -216,7 +221,7 @@ public class MainView {
         TextArea definitionsArea = new TextArea();
         definitionsArea.setWrapText(true);
 
-        VBox editForm = new VBox(10, slangLabel, slangField, defLabel, definitionsArea, saveBtn, statusLabel);
+        VBox editForm = new VBox(10, slangLabel, slangField, defLabel, definitionsArea, actionBox, statusLabel);
 
         // Binding UI attributes with Properties of Controller
         statusLabel.textProperty().bind(controller.editStatusProperty());
@@ -229,6 +234,11 @@ public class MainView {
 
         saveBtn.setOnAction(e -> {
             controller.handleSaveSlangEdit();
+            searchField.clear();
+        });
+
+        deleteBtn.setOnAction(e -> {
+            controller.handleDeleteSlang();
             searchField.clear();
         });
 
