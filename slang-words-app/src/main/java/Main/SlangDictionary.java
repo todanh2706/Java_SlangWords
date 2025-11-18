@@ -5,14 +5,19 @@
 package Main;
 
 import java.io.BufferedReader;
+import java.io.Reader;
+import java.io.InputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.FileReader;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,8 +91,26 @@ public class SlangDictionary implements Serializable {
         this.randomSlangOfDay = null;
         this.dateOfRandomSlang = null;
 
-        try (FileReader fileReader = new FileReader(this.textFilePath);
-                BufferedReader br = new BufferedReader(fileReader)) {
+        BufferedReader br = null;
+        Reader fileReader = null;
+
+        try {
+            File file = new File(this.textFilePath);
+
+            if (file.isAbsolute()) {
+                fileReader = new FileReader(file);
+            } else {
+                InputStream is = getClass().getClassLoader().getResourceAsStream(this.textFilePath);
+
+                if (is == null) {
+                    throw new FileNotFoundException("Cannot find internal resource: " + this.textFilePath
+                            + ". Make sure it's in 'src/main/resources'.");
+                }
+
+                fileReader = new InputStreamReader(is, StandardCharsets.UTF_8);
+            }
+
+            br = new BufferedReader(fileReader);
             br.readLine();
 
             String line;
@@ -116,7 +139,7 @@ public class SlangDictionary implements Serializable {
                             this.definitionMap.computeIfAbsent(cleanKeyword, k -> new HashSet<>()).add(slang);
                         }
                     }
-                } catch (ArrayIndexOutOfBoundsException err) {
+                } catch (ArrayIndexOutOfBoundsException | NullPointerException err) {
                     System.err.println("Error: Skip line " + lineNumber + " cause the issue when analysis: " + line);
                 }
             }
@@ -137,6 +160,13 @@ public class SlangDictionary implements Serializable {
                 System.out.println("  Slangs (Set): " + entry.getValue());
                 System.out.println("---");
             });
+        } finally {
+            if (br != null) {
+                br.close();
+            }
+            if (fileReader != null) {
+                fileReader.close();
+            }
         }
     }
 

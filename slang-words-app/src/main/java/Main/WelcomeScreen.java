@@ -1,3 +1,7 @@
+/**
+ * @author Gemini 2.5 Pro
+ */
+
 package Main;
 
 import javafx.geometry.Insets;
