@@ -1,8 +1,10 @@
 # Java Project: Slang Words
 
+### Brief description
+
 The desktop application was built using JavaFX and Maven, allows user to manage, search and learn the slangs through out a friendly user interface.
 
-# How to run? (For dev)
+### How to run? (For dev)
 
 The bash command to run the project in this state is (suppose that you are being at the root dir of the project)
 
@@ -10,7 +12,7 @@ The bash command to run the project in this state is (suppose that you are being
 $ cd slang-words-app; mvn clean javafx:run
 ```
 
-# How to run? (For casual user)
+### How to run? (For casual user)
 
 The bash command to run the project in this state is (suppose that you are being at the root dir of the project)
 
@@ -18,14 +20,14 @@ The bash command to run the project in this state is (suppose that you are being
 $ cd slang-words-app/target; java -jar slang-dictionary-app-1.0-SNAPSHOT.jar
 ```
 
-# Application overview
+### Application overview
 
 -   Welcome page:
 -   Main page:
 -   Quiz:
 -   Admin:
 
-# Prominent feature
+### Prominent feature
 
 -   Slang of the day: randomly show slang in the center of the welcome page (randomly change once per day).
 -   Slang management:
@@ -39,7 +41,7 @@ $ cd slang-words-app/target; java -jar slang-dictionary-app-1.0-SNAPSHOT.jar
 -   Searching history.
 -   Saving mechanism: save the changes for any adjustment.
 
-# Tech stack
+### Tech stack
 
 -   Language: Java 11+.
 -   GUI: JavaFX.
